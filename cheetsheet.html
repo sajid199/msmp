@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 14mm 13mm 16mm 13mm; }
+  * { box-sizing: border-box; }
+  :root {
+    --ink: #243447;
+    --navy: #1f4e79;
+    --blue: #2e75b6;
+    --accent: #e67e22;
+    --muted: #66788a;
+    --line: #dce5ee;
+    --panel: #f7fbff;
+    --paper: #fffefc;
+    --shadow: 0 14px 34px rgba(31, 78, 121, 0.12);
+  }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9.3pt;
+    line-height: 1.35;
+    color: var(--ink);
+    margin: 0;
+    padding: 22px 16px 38px;
+    background: linear-gradient(180deg, #eef5fb 0%, #f8fcff 100%);
+  }
+  .sheet-shell {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .page {
+    page-break-after: always;
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto 24px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 16px 18px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .page::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--navy), var(--blue), #74b9ff);
+  }
+  .page:last-child { page-break-after: auto; margin-bottom: 0; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    color: #fff;
+    background: linear-gradient(90deg, var(--navy), var(--blue));
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,.18);
+  }
+  .topbar .brand { font-size: 9.1pt; font-weight: 800; letter-spacing: 0.3px; }
+  .topbar .tag { font-size: 7.7pt; opacity: 0.95; }
+
+  h1.cover-title {
+    font-size: 25pt;
+    color: var(--navy);
+    margin: 0 0 3px 0;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+  .cover-sub {
+    font-size: 12.5pt;
+    color: var(--muted);
+    margin: 0 0 5px 0;
+    font-weight: 600;
+  }
+  .cover-meta {
+    font-size: 9pt;
+    color: #6a7480;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+  .cover-band {
+    background: linear-gradient(90deg, var(--navy), var(--blue));
+    height: 6px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .scope-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .scope-chip {
+    flex: 1;
+    min-width: 120px;
+    background: linear-gradient(135deg, #f4f8ff, #eaf3fb);
+    border: 1px solid #cfdce9;
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 8.3pt;
+    color: var(--navy);
+    font-weight: 700;
+    text-align: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  }
+
+  h2.sec {
+    font-size: 13pt;
+    color: var(--navy);
+    border-bottom: 1.5px solid var(--line);
+    padding: 6px 8px 5px;
+    margin: 0 0 8px 0;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(90deg, rgba(31,78,121,.08), rgba(46,117,182,.03));
+  }
+  h2.sec .num {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--navy), var(--blue));
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    text-align: center;
+    line-height: 20px;
+    font-size: 10pt;
+    margin-right: 7px;
+    vertical-align: middle;
+    box-shadow: 0 3px 8px rgba(31,78,121,.25);
+  }
+  h3.sub {
+    font-size: 9.6pt;
+    color: var(--blue);
+    margin: 10px 0 4px 0;
+    font-weight: 700;
+    border-left: 3px solid var(--blue);
+    padding-left: 6px;
+    background: rgba(46,117,182,.05);
+    border-radius: 0 4px 4px 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  .cols2 { display: flex; gap: 18px; align-items: flex-start; }
+  .cols2 > .colhalf { flex: 1; min-width: 0; }
+  .cols2 h3.sub { break-inside: avoid; }
+  .cols2 h3.sub:first-child { margin-top: 0; }
+  .keep { break-inside: avoid; }
+
+  p { margin: 4px 0; }
+  ul { margin: 3px 0 8px 16px; padding: 0; }
+  li { margin-bottom: 2px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 4px 0 10px 0;
+    font-size: 8.4pt;
+    break-inside: avoid;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th {
+    background: linear-gradient(90deg, var(--navy), #2b6ea0);
+    color: #fff;
+    text-align: left;
+    padding: 5px 6px;
+    font-size: 8.3pt;
+  }
+  td {
+    border-bottom: 1px solid #e8eef4;
+    padding: 3.8px 6px;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #f8fbfe; }
+  .tcode { font-family: 'Courier New', monospace; color: #b4530a; font-weight: 700; }
+
+  .note {
+    background: linear-gradient(90deg, #fff8e6, #fffdf6);
+    border-left: 3px solid #e0a800;
+    padding: 6px 8px;
+    font-size: 8.3pt;
+    margin: 6px 0;
+    border-radius: 0 6px 6px 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .tip {
+    background: linear-gradient(90deg, #ebf8ee, #f8fef9);
+    border-left: 3px solid #3c9a5f;
+    padding: 6px 8px;
+    font-size: 8.3pt;
+    margin: 6px 0;
+    border-radius: 0 6px 6px 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .flow {
+    background: linear-gradient(135deg, #eef6ff, #fef7ea);
+    border: 1px dashed #9eb6cc;
+    padding: 7px 9px;
+    font-size: 8.5pt;
+    margin: 6px 0;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    color: var(--navy);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 7.6pt;
+    font-weight: 700;
+    color: #fff;
+    padding: 1.6px 6px;
+    border-radius: 999px;
+    margin-right: 4px;
+  }
+  .b-ara { background: #2e75b6; }
+  .b-arm { background: #3c9a5f; }
+  .b-eam { background: #c0392b; }
+  .b-brm { background: #7b4fa0; }
+
+  .grid4 { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .grid4 .card {
+    flex: 1;
+    min-width: 140px;
+    border: 1px solid #d8e0e8;
+    border-radius: 8px;
+    padding: 7px 8px;
+    font-size: 8.1pt;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    box-shadow: 0 4px 10px rgba(0,0,0,.03);
+  }
+  .grid4 .card .ttl { font-weight: 800; font-size: 9pt; margin-bottom: 2px; }
+  .card-ara { border-top: 4px solid #2e75b6; }
+  .card-arm { border-top: 4px solid #3c9a5f; }
+  .card-eam { border-top: 4px solid #c0392b; }
+  .card-brm { border-top: 4px solid #7b4fa0; }
+
+  .qa { margin-bottom: 7px; break-inside: avoid; padding: 6px 0; }
+  .qa .q { font-weight: 700; color: var(--navy); }
+  .qa .q::before { content: "Q: "; color: #b4530a; }
+  .qa .a::before { content: "A: "; font-weight: 700; }
+
+  .footer-note { font-size: 7.6pt; color: #7e8792; text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="sheet-shell">
+
+<!-- ============ PAGE 1 : COVER + CORE AUTH CONCEPTS ============ -->
+<div class="page">
+  <h1 class="cover-title">SAP Security &amp; GRC Access Control</h1>
+  <p class="cover-sub">Interview Cheat Sheet — ECC · S/4HANA · Fiori · GRC AC 12.0</p>
+  <p class="cover-meta">Sajid Ahmad — 5 years SAP Security &amp; GRC experience (SAP Security Associate Consultant, GE Vernova / Capgemini)</p>
+  <div class="cover-band"></div>
+  <div class="scope-row">
+    <div class="scope-chip">Roles &amp; PFCG</div>
+    <div class="scope-chip">User Admin</div>
+    <div class="scope-chip">S/4HANA &amp; Fiori</div>
+    <div class="scope-chip">GRC ARA · ARM · EAM · BRM</div>
+  </div>
+
+  <h2 class="sec"><span class="num">1</span>Core Authorization Concepts</h2>
+  <div class="cols2">
+    <div class="colhalf">
+    <h3 class="sub">Role Types</h3>
+    <ul>
+      <li><b>Single Role</b> — one PFCG role, one set of menu + auth data.</li>
+      <li><b>Composite Role</b> — a container of single roles; has no auth data of its own, just bundles roles for easier assignment.</li>
+      <li><b>Derived Role</b> — inherits menu &amp; authorizations from a master role; only <b>org level values</b> (e.g. Company Code, Plant) differ per derived role.</li>
+      <li><b>Enabler / Parent-Child</b> pattern used heavily for plant / company-code-specific access without rebuilding menus.</li>
+    </ul>
+
+    <h3 class="sub">PFCG Build Flow</h3>
+    <div class="flow">Menu Tab → Authorizations Tab → Maintain Org Levels → Generate Profile → Add Role to User → User Comparison</div>
+    <ul>
+      <li><b>Menu tab</b>: add T-Codes / Fiori catalogs &amp; groups / web links.</li>
+      <li><b>Authorizations tab</b>: values pulled from SU24; yellow = needs org value, red = needs field value, green = complete.</li>
+      <li><b>Expert Mode</b>: used to manually add/edit auth objects not proposed by SU24.</li>
+      <li><b>Generate</b> creates the authorization profile (Z-profile) tied to the role.</li>
+    </ul>
+    </div>
+    <div class="colhalf">
+    <h3 class="sub">Authorization Object Structure</h3>
+    <p>Object Class → Authorization Object → up to 10 Fields → Field Values</p>
+    <div class="flow">S_TCODE (object) → TCD (field) → MM03 (value)</div>
+
+    <h3 class="sub">Frequently-Used Auth Objects</h3>
+    <table>
+      <tr><th>Object</th><th>Controls</th></tr>
+      <tr><td class="tcode">S_TCODE</td><td>Transaction start authorization</td></tr>
+      <tr><td class="tcode">S_USER_GRP</td><td>User group a Security admin can maintain</td></tr>
+      <tr><td class="tcode">S_USER_PRO</td><td>Profiles a Security admin can assign</td></tr>
+      <tr><td class="tcode">S_USER_AGR</td><td>Roles a Security admin can assign</td></tr>
+      <tr><td class="tcode">S_USER_TCD</td><td>T-codes allowed inside a role</td></tr>
+      <tr><td class="tcode">S_USER_AUT</td><td>Authorization field maintenance (PFCG)</td></tr>
+      <tr><td class="tcode">S_TABU_DIS / S_TABU_NAM</td><td>Table maintenance access (generic / named)</td></tr>
+      <tr><td class="tcode">S_DEVELOP</td><td>ABAP development objects</td></tr>
+      <tr><td class="tcode">S_RFC</td><td>RFC function group access</td></tr>
+      <tr><td class="tcode">S_BTCH_JOB / S_BTCH_ADM</td><td>Background job operate / admin</td></tr>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2 : USER ADMIN ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">2</span>User Administration &amp; Info System</h2>
+  <div class="cols2">
+    <div class="colhalf">
+    <h3 class="sub">User Types</h3>
+    <table>
+      <tr><th>Type</th><th>Notes</th></tr>
+      <tr><td>Dialog</td><td>Business users, interactive logon, password expires</td></tr>
+      <tr><td>System</td><td>RFC / background jobs, no dialog logon, password never expires, multiple logons OK</td></tr>
+      <tr><td>Communication</td><td>SAP ↔ non-SAP system integration</td></tr>
+      <tr><td>Service</td><td>Shared/anonymous access, no password expiry</td></tr>
+      <tr><td>Reference</td><td>No logon — used to grant additional auth to another user</td></tr>
+    </table>
+
+    <h3 class="sub">Key Tables</h3>
+    <table>
+      <tr><th>Table</th><th>Contains</th></tr>
+      <tr><td class="tcode">USR02</td><td>User master — type, lock status, validity, last logon</td></tr>
+      <tr><td class="tcode">USR21 / ADR6</td><td>Person number → email address</td></tr>
+      <tr><td class="tcode">USR03</td><td>Name / department / address</td></tr>
+      <tr><td class="tcode">AGR_USERS</td><td>Role ↔ user assignment</td></tr>
+      <tr><td class="tcode">AGR_1251</td><td>Role authorization data (objects/fields)</td></tr>
+      <tr><td class="tcode">AGR_TCODES</td><td>T-codes assigned to a role</td></tr>
+      <tr><td class="tcode">USOBT_C / USOBX_C</td><td>SU24 proposed auth values (customer table)</td></tr>
+    </table>
+    </div>
+    <div class="colhalf">
+    <h3 class="sub">Lock Status Values (USR02-UFLAG)</h3>
+    <table>
+      <tr><th>Value</th><th>Meaning</th></tr>
+      <tr><td>0</td><td>Not locked</td></tr>
+      <tr><td>32</td><td>Locked globally (admin, all clients)</td></tr>
+      <tr><td>64</td><td>Locked by administrator (local)</td></tr>
+      <tr><td>128</td><td>Locked due to failed logon attempts</td></tr>
+    </table>
+
+    <h3 class="sub">Everyday Transactions</h3>
+    <table>
+      <tr><th>T-Code</th><th>Use</th></tr>
+      <tr><td class="tcode">SU01</td><td>Create/change user, assign roles</td></tr>
+      <tr><td class="tcode">SU10</td><td>Mass user maintenance</td></tr>
+      <tr><td class="tcode">SU3</td><td>User's own defaults / parameters</td></tr>
+      <tr><td class="tcode">SUGR</td><td>Maintain user groups</td></tr>
+      <tr><td class="tcode">SUIM</td><td>User Information System — the audit toolbox</td></tr>
+      <tr><td class="tcode">EWZ5</td><td>Mass lock / unlock users</td></tr>
+      <tr><td class="tcode">RZ10</td><td>Password policy profile parameters</td></tr>
+    </table>
+
+    <h3 class="sub">SUIM — Most-Used Reports</h3>
+    <ul>
+      <li>Users by Role / Roles by User</li>
+      <li>Users by Complex Selection Criteria (auth object/value)</li>
+      <li>Roles by Transaction Code</li>
+      <li>Change Documents for Users / Roles</li>
+      <li>Critical Combinations (basic SoD check without GRC)</li>
+    </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 3 : ROLE BUILD, TRANSPORT & MAINTENANCE ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">3</span>Role Build, Transport &amp; Maintenance</h2>
+  <div class="cols2">
+    <div class="colhalf">
+    <h3 class="sub">Naming Convention (typical)</h3>
+    <table>
+      <tr><th>Prefix</th><th>Meaning</th></tr>
+      <tr><td class="tcode">Z_S_...</td><td>Single role</td></tr>
+      <tr><td class="tcode">Z_C_...</td><td>Composite role</td></tr>
+      <tr><td class="tcode">Z_D_...</td><td>Derived role</td></tr>
+      <tr><td class="tcode">Z_FF_...</td><td>Firefighter ID role (GRC EAM)</td></tr>
+    </table>
+
+    <h3 class="sub">Derived Role Logic</h3>
+    <p>Master role defines menu + non-org authorizations. Each derived role copies that data and only <b>org level values</b> (Company Code, Plant, Sales Org, etc.) are re-entered per derived role. Menu changes on the master automatically flow down.</p>
+    <div class="note">Changing a field that is <b>not</b> an org level on the master and forgetting to re-generate derived roles is a classic audit finding — always regenerate + user-compare after master changes.</div>
+
+    <h3 class="sub">Role Transport Process</h3>
+    <div class="flow">PFCG (Dev) → Save/Generate → Transport Request → STMS Release → Import to QAS → Import to PRD</div>
+    <ul>
+      <li>Role transports carry both the menu (agr_*) and the generated profile.</li>
+      <li>Org values are <b>not</b> transported automatically in some setups — always confirm and re-generate/re-derive in target client if org values were changed locally.</li>
+    </ul>
+    </div>
+    <div class="colhalf">
+    <h3 class="sub">User Comparison</h3>
+    <table>
+      <tr><th>T-Code</th><th>Use</th></tr>
+      <tr><td class="tcode">PFUD</td><td>Mass user comparison (background job — run regularly)</td></tr>
+      <tr><td class="tcode">PFCG → User tab</td><td>Individual role → user comparison</td></tr>
+      <tr><td class="tcode">SUPC</td><td>Mass role generation / profile regeneration</td></tr>
+    </table>
+    <p>Comparison pushes the generated profile into the user master (USR04) — without it, a newly built/changed role has no effect even if assigned.</p>
+
+    <h3 class="sub">SoD-Aware Role Design</h3>
+    <ul>
+      <li>Keep roles single-purpose / task-based rather than broad "do everything" roles.</li>
+      <li>Avoid combining conflicting business functions (e.g. Create Vendor + Post Payment) in one role.</li>
+      <li>Run GRC risk analysis on role design <i>before</i> go-live, not just at user assignment.</li>
+      <li>Use Firefighter (EAM) for rare elevated access instead of building it into standard roles.</li>
+    </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 4 : TROUBLESHOOTING TOOLKIT ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">4</span>Authorization Troubleshooting Toolkit</h2>
+
+  <h3 class="sub">Tool Comparison</h3>
+  <table>
+    <tr><th>Tool</th><th>Best For</th><th>How it works</th></tr>
+    <tr><td class="tcode">SU53</td><td>Quick check right after a failure</td><td>Shows the single last failed authorization check for that user session</td></tr>
+    <tr><td class="tcode">STAUTHTRACE</td><td>Deep / intermittent / complex issues</td><td>Full authorization trace across a session — captures every object checked</td></tr>
+    <tr><td class="tcode">ST01</td><td>System-wide tracing incl. RFC</td><td>General system trace (auth, RFC, DB, table access)</td></tr>
+    <tr><td class="tcode">SU56</td><td>See a user's actual buffered authorizations</td><td>Displays the authorization buffer for the logged-on user</td></tr>
+    <tr><td class="tcode">/IWFND/ERROR_LOG</td><td>Fiori / OData failures</td><td>Gateway frontend error log</td></tr>
+    <tr><td class="tcode">/IWBEP/ERROR_LOG</td><td>Central Hub backend OData errors</td><td>Gateway backend error log</td></tr>
+  </table>
+
+  <h3 class="sub">Standard Resolution Flow</h3>
+  <div class="flow">
+  Reproduce Issue → SU53 (or STAUTHTRACE if unclear) → Identify missing Object/Field/Value<br>
+  → Find owning Role (SUIM: Roles by User) → PFCG: add via SU24 proposal or Expert Mode<br>
+  → Change Authorization Data → Generate Profile → PFUD / User Comparison → Retest
+  </div>
+
+  <h3 class="sub">Common Symptom → Cause</h3>
+  <table>
+    <tr><th>Symptom</th><th>Likely Cause</th></tr>
+    <tr><td>"You are not authorized" on a T-Code</td><td>Missing S_TCODE or a specific field value inside the role</td></tr>
+    <tr><td>User can start transaction but can't post/save</td><td>Missing activity (ACTVT) value, e.g. 01/02 Create/Change</td></tr>
+    <tr><td>Fiori tile visible, app won't open</td><td>Missing IWSG (frontend service) or S_TCODE for SAP GUI apps</td></tr>
+    <tr><td>Fiori app opens, no data</td><td>Missing IWSV (backend) or org-level restriction on data</td></tr>
+    <tr><td>Works in DEV, fails in PRD</td><td>Org values not maintained/transported for that client, or user comparison not run</td></tr>
+    <tr><td>Worked yesterday, fails today</td><td>SU24 default changed by an upgrade/SU25 run, or role was regenerated without org values</td></tr>
+  </table>
+  <div class="tip">Interview line: "I always confirm the exact error, reproduce it, trace with SU53 first — and escalate to STAUTHTRACE only if SU53 doesn't show the full picture, e.g. multi-step BAPI calls."</div>
+</div>
+
+<!-- ============ PAGE 5 : S/4HANA & FIORI SECURITY ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">5</span>S/4HANA &amp; Fiori Security</h2>
+  <div class="cols2">
+    <div class="colhalf">
+    <h3 class="sub">ECC vs S/4HANA</h3>
+    <table>
+      <tr><th>Aspect</th><th>ECC</th><th>S/4HANA</th></tr>
+      <tr><td>Database</td><td>Any (Oracle, DB2...)</td><td>HANA only</td></tr>
+      <tr><td>UI</td><td>SAP GUI / T-Codes</td><td>Fiori Apps (+ GUI still works)</td></tr>
+      <tr><td>Auth model</td><td>Roles, PFCG, Auth Objects</td><td>Same — unchanged foundation</td></tr>
+    </table>
+
+    <h3 class="sub">Fiori Security Flow</h3>
+    <div class="flow">GUI: User → Role → Auth Object → T-Code<br>Fiori: User → Role → Catalog → Tile → Target Mapping → App → Auth Object</div>
+
+    <h3 class="sub">Core Components</h3>
+    <ul>
+      <li><b>Catalog</b> — collection of apps (Technical = SAP ref; Business = process-based)</li>
+      <li><b>Tile</b> — visual icon (Static / Dynamic / Custom)</li>
+      <li><b>Target Mapping</b> — Semantic Object + Action → resolves to the app</li>
+      <li><b>Space → Page → Section → Tile</b> — modern navigation hierarchy (replaces Groups)</li>
+    </ul>
+    </div>
+    <div class="colhalf">
+    <h3 class="sub">Application Types &amp; Auth Source</h3>
+    <table>
+      <tr><th>Type</th><th>Auth Source</th></tr>
+      <tr><td>Transactional / Analytical</td><td>OData: IWSG (frontend) + IWSV (backend)</td></tr>
+      <tr><td>Fact Sheet</td><td>OData + HANA Enterprise Search connectors</td></tr>
+      <tr><td>SAP GUI App</td><td>S_TCODE via SU24 (not OData)</td></tr>
+      <tr><td>Web Dynpro</td><td>Web Dynpro app authorizations</td></tr>
+    </table>
+
+    <h3 class="sub">IWSG vs IWSV</h3>
+    <p><b>IWSG</b> (Gateway Service Group) = frontend, starts the app. <b>IWSV</b> (Gateway Service) = backend, supplies the real authorization objects. Missing IWSG → app won't start. Missing IWSV → app starts but data/actions fail.</p>
+
+    <h3 class="sub">Deployment &amp; Key T-Codes</h3>
+    <table>
+      <tr><th>Item</th><th>Note</th></tr>
+      <tr><td>Embedded</td><td>Frontend + Backend same system — most common, simpler roles</td></tr>
+      <tr><td>Central Hub</td><td>Separate systems — separate frontend/backend roles</td></tr>
+      <tr><td class="tcode">/UI2/FLPD_CUST</td><td>Launchpad Designer — catalogs/tiles/target mappings</td></tr>
+      <tr><td class="tcode">/IWFND/MAINT_SERVICE</td><td>Activate OData services</td></tr>
+      <tr><td class="tcode">/UI2/RSP_LIST</td><td>View Role ↔ Space ↔ Page mapping</td></tr>
+    </table>
+    </div>
+  </div>
+  <div class="note">Full Fiori deep-dive (app types, troubleshooting playbook, 10+ Q&amp;A) available in the companion "SAP Fiori Security Interview Cheat Sheet."</div>
+</div>
+
+<!-- ============ PAGE 6 : GRC OVERVIEW ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">6</span>GRC Access Control — Overview</h2>
+  <p>GRC Access Control (AC 12.0 / GRC on S/4HANA) governs <b>who can request, get, and use access</b> across connected SAP &amp; non-SAP systems, layered on top of standard PFCG security. Four pillars:</p>
+
+  <div class="grid4">
+    <div class="card card-ara"><div class="ttl"><span class="badge b-ara">ARA</span></div>Access Risk Analysis — finds &amp; mitigates Segregation of Duties (SoD) risk in users/roles</div>
+    <div class="card card-arm"><div class="ttl"><span class="badge b-arm">ARM</span></div>Access Request Management — workflow-driven access provisioning</div>
+    <div class="card card-eam"><div class="ttl"><span class="badge b-eam">EAM</span></div>Emergency Access Management — controlled, logged "Firefighter" elevated access</div>
+    <div class="card card-brm"><div class="ttl"><span class="badge b-brm">BRM</span></div>Business Role Management — standardized methodology for building/maintaining roles</div>
+  </div>
+
+  <h3 class="sub">High-Level Architecture</h3>
+  <div class="flow">GRC System (NWBC / Fiori Launchpad) ⇄ Connectors (RFC / Web Service) ⇄ Backend Plug-in (/GRCPI/...) ⇄ ECC / S4HANA / Non-SAP</div>
+  <ul>
+    <li>Backend systems run the <b>GRC plug-in</b> so GRC can read roles, users, and authorization data and push provisioning requests back.</li>
+    <li><b>BRF+ (Business Rule Framework plus)</b> drives dynamic decision logic — used heavily in ARM routing and MSMP workflow initiator rules.</li>
+    <li><b>MSMP (Multi-Stage Multi-Path)</b> is the workflow engine behind Access Requests and other GRC processes.</li>
+  </ul>
+
+  <h3 class="sub">Global / Config Transactions</h3>
+  <table>
+    <tr><th>T-Code</th><th>Use</th></tr>
+    <tr><td class="tcode">NWBC</td><td>Classic GRC launchpad (Fiori apps used in newer versions)</td></tr>
+    <tr><td class="tcode">SPRO</td><td>IMG — GRC Access Control configuration node</td></tr>
+    <tr><td class="tcode">SM30</td><td>Maintain GRC config tables (e.g. connectors, rule sets)</td></tr>
+    <tr><td class="tcode">GRFNMW_DEV_RULE / GRFNMW_CONFIGURE_WD</td><td>MSMP workflow configuration &amp; rule assignment</td></tr>
+    <tr><td class="tcode">BRF+ (Workbench)</td><td>Build initiator / routing / agent rules for workflow</td></tr>
+    <tr><td class="tcode">GRAC_SPM</td><td>Emergency Access (Firefighter) launch &amp; log review</td></tr>
+  </table>
+  <div class="tip">Interview one-liner: "GRC AC doesn't replace PFCG security — it sits on top of it to govern the request, risk, emergency-access, and role-lifecycle processes around that same authorization model."</div>
+</div>
+
+<!-- ============ PAGE 7 : ARA ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">7</span><span class="badge b-ara">ARA</span>Access Risk Analysis</h2>
+  <div class="cols2">
+    <div class="colhalf">
+    <h3 class="sub">Key Terms</h3>
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Risk ID</td><td>A defined SoD or critical-access risk, e.g. "Create Vendor + Post Payment"</td></tr>
+      <tr><td>Function</td><td>Groups related Actions/Permissions that represent one business task</td></tr>
+      <tr><td>Action</td><td>A T-Code / Fiori app tied to a Function</td></tr>
+      <tr><td>Permission</td><td>The authorization object/field/value behind an Action</td></tr>
+      <tr><td>Rule Set</td><td>The full library of risks used for analysis (SAP-delivered "Global Rule Set" or a custom one)</td></tr>
+      <tr><td>Mitigating Control</td><td>A compensating control (e.g. a monthly report review) assigned to accept a risk</td></tr>
+    </table>
+
+    <h3 class="sub">Risk Types</h3>
+    <ul>
+      <li><b>SoD Risk</b> — conflict between two or more Functions (e.g. Create PO + Approve PO)</li>
+      <li><b>Critical Action</b> — a single sensitive T-Code/app (e.g. SU01, PFCG)</li>
+      <li><b>Critical Permission</b> — a single sensitive authorization value</li>
+    </ul>
+    </div>
+    <div class="colhalf">
+    <h3 class="sub">Risk Levels</h3>
+    <table>
+      <tr><th>Level</th><th>Typical meaning</th></tr>
+      <tr><td>Critical</td><td>High-impact fraud/financial risk — must be mitigated or remediated</td></tr>
+      <tr><td>High</td><td>Significant risk — needs mitigation or role redesign</td></tr>
+      <tr><td>Medium</td><td>Moderate — monitor / mitigate depending on org policy</td></tr>
+      <tr><td>Low</td><td>Minor — usually accepted or lightly monitored</td></tr>
+    </table>
+
+    <h3 class="sub">Analysis Types</h3>
+    <ul>
+      <li><b>User-level analysis</b> — what SoD conflicts a specific user actually has (across assigned roles)</li>
+      <li><b>Role-level analysis</b> — SoD risk baked into a role's design, before it's ever assigned</li>
+      <li><b>Simulation</b> — "what-if" analysis before adding a role/access to a user, to catch new conflicts pre-emptively</li>
+      <li><b>Batch Risk Analysis</b> — scheduled background job to keep risk data current org-wide</li>
+    </ul>
+
+    <h3 class="sub">Mitigation Lifecycle</h3>
+    <div class="flow">Risk Identified → Mitigating Control defined → Control assigned to User/Role → Control Monitor performs periodic review → Recertification / re-approval</div>
+    <p>A Mitigating Control has a <b>Control Owner</b> (defines it), a <b>Monitor</b> (performs the review), and an <b>Approver</b> (approves the assignment) — segregating the mitigation process itself.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 8 : ARM ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">8</span><span class="badge b-arm">ARM</span>Access Request Management</h2>
+  <div class="cols2">
+    <div class="colhalf">
+    <h3 class="sub">Request Types</h3>
+    <ul>
+      <li><b>New Account</b> — first-time system access</li>
+      <li><b>Change / Modify</b> — add/remove roles for an existing user</li>
+      <li><b>Extend Validity</b> — extend an expiring role assignment</li>
+      <li><b>Lock / Delete</b> — deactivate or remove access (e.g. leaver process)</li>
+      <li><b>Firefighter ID Assignment</b> — request temporary elevated access (feeds EAM)</li>
+      <li><b>Mass Access Request</b> — bulk requests, e.g. new-hire batches</li>
+    </ul>
+
+    <h3 class="sub">Workflow Engine — MSMP</h3>
+    <div class="flow">Request Created → BRF+ Initiator Rule picks the correct Path/Process → Stage 1 (e.g. Manager Approval) → Stage 2 (Role Owner) → Stage 3 (Security Approval) → Provisioning</div>
+    <ul>
+      <li><b>Process ID</b> — the overall workflow definition (e.g. Access Request process)</li>
+      <li><b>Path</b> — a specific route through stages, chosen dynamically by rule (e.g. by request type, risk level, org unit)</li>
+      <li><b>Stage / Agent</b> — each approval step and who (role or named approver) can act on it</li>
+    </ul>
+    </div>
+    <div class="colhalf">
+    <h3 class="sub">Embedded Risk Analysis</h3>
+    <p>SoD risk analysis runs automatically <i>during</i> the request (not just after). If the new access creates a conflict, the requestor/approver sees the violation and must:</p>
+    <ul>
+      <li><b>Mitigate</b> — assign an existing mitigating control</li>
+      <li><b>Remediate</b> — remove the conflicting access from the request</li>
+      <li><b>Accept &amp; proceed</b> — if policy allows, with justification/approval</li>
+    </ul>
+
+    <h3 class="sub">Provisioning Types</h3>
+    <table>
+      <tr><th>Type</th><th>Behavior</th></tr>
+      <tr><td>Automatic / Direct</td><td>GRC pushes the role/access straight into the backend system via connector</td></tr>
+      <tr><td>Indirect</td><td>Access is granted by assigning a business role that maps to backend roles</td></tr>
+      <tr><td>No Provisioning</td><td>Manual/offline — GRC just documents the approval, security team applies it manually</td></tr>
+    </table>
+    <div class="tip">Interview line: "ARM isn't just an approval chain — it embeds SoD risk analysis at request time, so violations get caught before provisioning, not after."</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 9 : EAM & BRM ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">9</span><span class="badge b-eam">EAM</span>Emergency Access &amp;<span class="badge b-brm" style="margin-left:6px">BRM</span>Business Role Mgmt</h2>
+  <div class="cols2">
+    <div class="colhalf">
+    <h3 class="sub">EAM — Key Roles</h3>
+    <table>
+      <tr><th>Role</th><th>Responsibility</th></tr>
+      <tr><td>Firefighter ID</td><td>Special user ID pre-loaded with elevated/emergency access</td></tr>
+      <tr><td>Firefighter (User)</td><td>The person who logs in "as" the Firefighter ID for a task</td></tr>
+      <tr><td>Firefighter Owner</td><td>Approves which users can use which Firefighter ID</td></tr>
+      <tr><td>Firefighter Controller</td><td>Reviews the activity/change log after each use</td></tr>
+    </table>
+
+    <h3 class="sub">EAM Flow</h3>
+    <div class="flow">User launches Firefighter ID (GRAC_SPM / Fiori app) → enters Reason Code + description → performs work under FF ID → session logged (actions, tables, changes) → Controller reviews log → sign-off / escalation if needed</div>
+    <ul>
+      <li><b>Centralized Firefighting</b> — access launched and controlled from the GRC system itself.</li>
+      <li><b>Decentralized Firefighting</b> — the Firefighter ID is assigned directly in the backend, GRC captures logs after the fact.</li>
+      <li>Reason codes are mandatory — they document <i>why</i> emergency access was needed, for audit.</li>
+    </ul>
+    </div>
+    <div class="colhalf">
+    <h3 class="sub">BRM — Core Idea</h3>
+    <p>BRM standardizes how roles are designed, built, and maintained across the landscape, rather than each consultant building roles ad-hoc in PFCG.</p>
+    <ul>
+      <li><b>Business Role</b> — a role defined from a business/process perspective (e.g. "AP Clerk").</li>
+      <li><b>Technical Role</b> — the underlying PFCG role(s) in one or more backend systems that a Business Role maps to.</li>
+      <li><b>Role Mining</b> — analyzes existing usage/access patterns to suggest role content instead of designing from scratch.</li>
+      <li><b>Role Owner / Approver</b> — accountable for what the role contains and who gets it.</li>
+      <li><b>Role Attributes</b> — metadata (org level, functional area, risk level) used to classify and search roles.</li>
+    </ul>
+    <div class="note">BRM enforces a consistent role lifecycle: Define → Build/Derive → Test → Approve → Deploy → Periodic Review — with SoD risk checked at each stage.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 10 : INTERVIEW Q&A + QUICK REVISION ============ -->
+<div class="page">
+  <div class="topbar"><span class="brand">SAP SECURITY &amp; GRC CHEAT SHEET</span><span class="tag">Sajid Ahmad</span></div>
+  <h2 class="sec"><span class="num">10</span>Top Interview Q&amp;A + Quick Revision</h2>
+  <div class="cols2">
+    <div class="colhalf">
+    <div class="qa"><div class="q">Difference between a Composite and a Derived role?</div><div class="a">Composite just bundles single roles for assignment convenience and has no auth data itself. Derived inherits menu + non-org authorizations from a master role and only needs org values maintained separately.</div></div>
+    <div class="qa"><div class="q">What is SU24 and why does it matter?</div><div class="a">It stores the proposed authorization objects/values per T-Code (check indicators). PFCG pulls from SU24 when building a role — if SU24 is wrong or unmaintained, the role build will be incomplete or inconsistent.</div></div>
+    <div class="qa"><div class="q">User reports "no authorization" — first three things you check?</div><div class="a">Reproduce the error, run SU53 immediately, then check the owning role in PFCG (SUIM: Roles by User) for the missing object/value.</div></div>
+    <div class="qa"><div class="q">How do you handle a SoD conflict found during an access request?</div><div class="a">Either mitigate it with an existing mitigating control, remediate by removing the conflicting access, or get formal risk acceptance/approval per company policy — never just push it through.</div></div>
+    </div>
+    <div class="colhalf">
+    <div class="qa"><div class="q">What's the point of Firefighter IDs if we already have roles?</div><div class="a">They provide time-boxed, logged, reason-coded elevated access for exceptions (e.g. period-end, incident fixes) instead of permanently widening a user's standard role — keeping day-to-day access lean.</div></div>
+    <div class="qa"><div class="q">Difference between IWSG and IWSV?</div><div class="a">IWSG is the frontend Gateway service that starts a Fiori app; IWSV is the backend service supplying the real authorization objects. Missing IWSG = app won't launch; missing IWSV = app opens but data/actions fail.</div></div>
+    <div class="qa"><div class="q">What's the difference between Access Risk Analysis and Access Request Management?</div><div class="a">ARA is the risk engine — it finds and helps mitigate SoD/critical-access risk. ARM is the provisioning workflow — it routes, approves, and provisions access requests, calling ARA's risk engine as part of that process.</div></div>
+    </div>
+  </div>
+
+  <h3 class="sub">One-Page Quick Revision</h3>
+  <table>
+    <tr><th>Concept</th><th>Key Point</th></tr>
+    <tr><td>PFCG</td><td>Role build/maintain — Menu → Auth → Org Values → Generate</td></tr>
+    <tr><td>SU24</td><td>Proposed auth values per T-Code, feeds PFCG</td></tr>
+    <tr><td>PFUD</td><td>Mass user comparison job</td></tr>
+    <tr><td>SU53 / STAUTHTRACE / ST01</td><td>Quick check / deep trace / system-wide trace</td></tr>
+    <tr><td>IWSG / IWSV</td><td>Fiori frontend service / backend service</td></tr>
+    <tr><td>ARA</td><td>Risk engine — Risk ID, Function, Rule Set, Mitigating Control</td></tr>
+    <tr><td>ARM</td><td>Request workflow — MSMP + BRF+, embedded risk check, provisioning</td></tr>
+    <tr><td>EAM</td><td>Firefighter ID / Owner / Controller, reason codes, log review</td></tr>
+    <tr><td>BRM</td><td>Business role ↔ technical role mapping, role mining, lifecycle</td></tr>
+  </table>
+  <p class="footer-note">SAP Security &amp; GRC Access Control Interview Cheat Sheet — Sajid Ahmad</p>
+</div>
+
+</div>
+</body>
+</html>
