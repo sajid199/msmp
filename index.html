@@ -98,9 +98,40 @@
     .flow{flex-direction:column;}
     .flow .arrow{transform:rotate(90deg);}
   }
+
+  /* ===== Google Translate button & widget ===== */
+  #google-translate-btn{
+    position:fixed; top:16px; right:16px; z-index:9999;
+    background:var(--blue); color:#fff; border:none;
+    padding:10px 18px; border-radius:24px;
+    font-family:'Segoe UI',Arial,sans-serif; font-weight:600; font-size:.85rem;
+    cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.18);
+    display:flex; align-items:center; gap:6px; transition:.2s ease;
+  }
+  #google-translate-btn:hover{background:var(--navy); transform:translateY(-1px);}
+  #google_translate_element{
+    position:fixed; top:60px; right:16px; z-index:9999;
+    background:#fff; border:1px solid var(--border); border-radius:8px;
+    padding:6px 10px; box-shadow:0 4px 12px rgba(0,0,0,.15);
+    display:none;
+  }
+  /* Hide the big Google top banner + stop it pushing the page down */
+  .goog-te-banner-frame{display:none !important;}
+  body{top:0 !important;}
+  .goog-te-gadget{font-family:'Segoe UI',Arial,sans-serif !important; font-size:.85rem !important;}
+  @media print{
+    #google-translate-btn, #google_translate_element{display:none !important;}
+  }
+  @media (max-width:600px){
+    #google-translate-btn{top:10px; right:10px; padding:8px 14px; font-size:.78rem;}
+    #google_translate_element{top:54px; right:10px;}
+  }
 </style>
 </head>
 <body>
+
+<button id="google-translate-btn" onclick="toggleTranslateWidget()">🌐 Translate</button>
+<div id="google_translate_element"></div>
 
 <header class="top">
   <h1>MSMP Workflow — GRC Access Control</h1>
@@ -315,5 +346,37 @@
 </section>
 
 </div>
+
+<script>
+  // Initializes the Google Website Translator widget
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement(
+      { pageLanguage: 'hi', includedLanguages: 'en,hi', autoDisplay: false },
+      'google_translate_element'
+    );
+  }
+
+  // Shows/hides the language dropdown when the floating button is clicked
+  function toggleTranslateWidget() {
+    var el = document.getElementById('google_translate_element');
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function setGoogTransCookie(lang) {
+    var expr = 'googtrans=/hi/' + lang;
+    document.cookie = expr + '; path=/';
+    document.cookie = expr + '; path=/; domain=.' + location.hostname;
+  }
+
+  // On first load (no translate cookie yet), force English as the default view
+  window.addEventListener('load', function () {
+    if (document.cookie.indexOf('googtrans') === -1) {
+      setGoogTransCookie('en');
+      location.reload();
+    }
+  });
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 </body>
 </html>
